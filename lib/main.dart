@@ -25,34 +25,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  int counter = 0;
-
-  void increment() {
-    counter++;
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Home')),
-      body: Center(child: Text('Welcome to E-nquire!')),
-    );
-  }
-}
-
-class SplashScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      body: Center(child: Image.asset('assets/logo.png')),
-    );
-  }
-}
+class MyAppState extends ChangeNotifier {}
 
 class SplashScreenWrapper extends StatefulWidget {
   @override
@@ -65,6 +38,7 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   @override
   void initState() {
     super.initState();
+
     Future.delayed(Duration(seconds: 3), () {
       setState(() {
         _showSplash = false;
@@ -74,6 +48,35 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return _showSplash ? SplashScreen() : MyHomePage();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: _showSplash ? const SplashScreen() : const MyHomePage(),
+    );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body: Center(
+        child: Image.asset('assets/images/logo.png', width: 200, height: 200),
+      ),
+    );
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Home')),
+      body: Center(child: Text('Welcome to E-nquire!')),
+    );
   }
 }

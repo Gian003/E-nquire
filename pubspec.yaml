@@ -54,10 +54,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter_native_splash:
-  color: "#22DEFF"
-  image: assets/splash.png
+  color: "#ffffff"
+  image: assets/images/logo.png
   android: true
   ios: true
+  web: false
 
 flutter:
 
