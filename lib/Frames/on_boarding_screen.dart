@@ -106,7 +106,7 @@ class Screen2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Screen 1',
+        'Screen 2',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
@@ -118,7 +118,7 @@ class Screen3 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Screen 1',
+        'Screen 3',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
