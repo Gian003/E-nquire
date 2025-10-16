@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:enquire/Frames/splash_screen.dart';
 import 'package:enquire/Frames/on_boarding_screen.dart';
+import 'package:enquire/Frames/home_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,15 +36,3 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Home')),
-      body: Center(child: Text('Welcome to E-nquire!')),
-    );
-  }
-}

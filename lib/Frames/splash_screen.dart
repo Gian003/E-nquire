@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:enquire/main.dart';
-
 class SplashScreenWrapper extends StatefulWidget {
   @override
   State<SplashScreenWrapper> createState() => _SplashScreenWrapperState();

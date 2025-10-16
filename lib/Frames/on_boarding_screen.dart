@@ -1,4 +1,3 @@
-import 'package:enquire/main.dart';
 import 'package:flutter/material.dart';
 
 class OnBoardingScreen extends StatefulWidget {
