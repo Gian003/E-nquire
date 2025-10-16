@@ -10,6 +10,19 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final List<Widget> _screens = [Screen1(), Screen2(), Screen3()];
   int _currentIndex = 0;
 
+  final PageController _pageController = PageController();
+
+  void _nextPage() {
+    if (_currentIndex < _screens.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,9 +75,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     if (_currentIndex < _screens.length - 1) {
                       _currentIndex++;
                     } else {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => MyHomePage()),
-                      );
+                      Navigator.pushReplacementNamed(context, '/home');
                     }
                   });
                 },
@@ -73,6 +84,42 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class Screen1 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Screen 1',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class Screen2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Screen 1',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class Screen3 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Screen 1',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }

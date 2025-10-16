@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:enquire/main.dart';
 
@@ -9,25 +8,20 @@ class SplashScreenWrapper extends StatefulWidget {
 }
 
 class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
-  bool _showSplash = true;
-
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _showSplash = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(seconds: 3), () {
+        Navigator.pushReplacementNamed(context, '/onboarding');
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      child: _showSplash ? const SplashScreen() : const MyHomePage(),
-    );
+    return const SplashScreen();
   }
 }
 

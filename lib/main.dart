@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:enquire/Frames/splash_screen.dart';
+import 'package:enquire/Frames/on_boarding_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,8 +21,14 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromRGBO(47, 88, 153, 100),
           ),
+          useMaterial3: true,
         ),
-        home: SplashScreen(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => SplashScreenWrapper(),
+          '/onboarding': (context) => OnBoardingScreen(),
+          '/home': (context) => MyHomePage(),
+        },
       ),
     );
   }
