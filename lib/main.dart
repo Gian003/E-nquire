@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:enquire/Frames/splash_screen.dart';
-import 'package:enquire/Frames/on_boarding_screen.dart';
-import 'package:enquire/Frames/home_screen.dart';
-import 'package:enquire/Frames/login_screen.dart';
+import 'package:enquire/Screen/splash_screen.dart';
+import 'package:enquire/Screen/on_boarding_screen.dart';
+import 'package:enquire/Screen/home_screen.dart';
+import 'package:enquire/Screen/login_screen.dart';
+import 'package:enquire/Screen/register_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,12 +26,13 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/login',
+        initialRoute: '/register',
         routes: {
           // '/': (context) => SplashScreenWrapper(),
           // '/onboarding': (context) => OnBoardingScreen(),
           // '/home': (context) => MyHomePage(),
-          '/login': (context) => LoginScreen(),
+          // '/login': (context) => LoginScreen(),
+          '/register': (context) => RegisterScreen(),
         },
       ),
     );
