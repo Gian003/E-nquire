@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:enquire/Frames/splash_screen.dart';
 import 'package:enquire/Frames/on_boarding_screen.dart';
 import 'package:enquire/Frames/home_screen.dart';
+import 'package:enquire/Frames/login_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,11 +25,12 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/',
+        initialRoute: '/login',
         routes: {
-          '/': (context) => SplashScreenWrapper(),
-          '/onboarding': (context) => OnBoardingScreen(),
-          '/home': (context) => MyHomePage(),
+          // '/': (context) => SplashScreenWrapper(),
+          // '/onboarding': (context) => OnBoardingScreen(),
+          // '/home': (context) => MyHomePage(),
+          '/login': (context) => LoginScreen(),
         },
       ),
     );
