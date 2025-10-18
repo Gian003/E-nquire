@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:enquire/Screen/register_screen.dart';
+// import 'package:enquire/Screen/splash_screen.dart';
+import 'package:enquire/Screen/on_boarding_screen.dart';
+// import 'package:enquire/Screen/login_screen.dart';
+// import 'package:enquire/Screen/register_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,13 +25,13 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/register',
+        initialRoute: '/onboarding',
         routes: {
           // '/': (context) => SplashScreenWrapper(),
-          // '/onboarding': (context) => OnBoardingScreen(),
+          '/onboarding': (context) => OnBoardingScreen(),
           // '/home': (context) => MyHomePage(),
           // '/login': (context) => LoginScreen(),
-          '/register': (context) => RegisterScreen(),
+          // '/register': (context) => RegisterScreen(),
         },
       ),
     );
