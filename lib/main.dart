@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:enquire/Screen/splash_screen.dart';
-import 'package:enquire/Screen/on_boarding_screen.dart';
-import 'package:enquire/Screen/home_screen.dart';
-import 'package:enquire/Screen/login_screen.dart';
 import 'package:enquire/Screen/register_screen.dart';
 
 void main() {

@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                         controller: _emailCotnroller,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Enter your email or your Phone number',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.horizontal(
@@ -250,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       GestureDetector(
                         onTap: () {
-                          // Handle sign up
+                          Navigator.pushReplacementNamed(context, '/register');
                         },
                         child: Text(
                           'Register',

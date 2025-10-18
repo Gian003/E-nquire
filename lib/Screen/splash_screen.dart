@@ -10,10 +10,10 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted) {
         Navigator.pushReplacementNamed(context, '/onboarding');
-      });
+      }
     });
   }
 
