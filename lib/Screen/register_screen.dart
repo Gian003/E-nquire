@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatefulWidget {
+  final TextEditingController? genderController;
+  const RegisterScreen({Key? key, this.genderController}) : super(key: key);
+
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -10,21 +13,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  //Password Variables
   bool _obscurePassword = true;
 
-  // @override
-  // void dispose() {
-  //   _firstnameController.dispose();
-  //   _lastnameController.dispose();
-  //   _emailController.dispose();
-  //   _passwordController.dispose();
-  //   _confirmPasswordController.dispose();
-  // }
+  //Address Controller
+  final TextEditingController _streetController = TextEditingController();
+  final TextEditingController _barangayController = TextEditingController();
+  final TextEditingController _municipalController = TextEditingController();
+  final TextEditingController _provinceController = TextEditingController();
+
+  //Gender Variables
+  late final TextEditingController _genderController;
+  late final bool _ownsGenderController;
+
+  final List<String> _genderList = [
+    'Male',
+    'Female',
+    'Non-Binary',
+    'Other',
+    'Prefer not to say',
+  ];
+  String? _selectedGender;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.genderController == null) {
+      _genderController = TextEditingController();
+      _ownsGenderController = true;
+    } else {
+      _genderController = widget.genderController!;
+      _ownsGenderController = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _firstnameController.dispose();
+    _lastnameController.dispose();
+    _ageController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+
+    _streetController.dispose();
+    _barangayController.dispose();
+    _municipalController.dispose();
+    _provinceController.dispose();
+
+    if (_ownsGenderController) _genderController.dispose();
+
+    super.dispose();
+  }
+
+  void _onRegisterPressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +165,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter your first name';
+                                }
+                                return null;
+                              },
                             ),
                           ),
 
@@ -127,6 +188,130 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter your last name';
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      //Age and Gender
+                      Row(
+                        children: [
+                          //Age
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Age',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                TextFormField(
+                                  controller: _ageController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter your age',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.horizontal(
+                                        left: Radius.circular(10),
+                                        right: Radius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter your age';
+                                    }
+
+                                    final age = int.tryParse(value);
+
+                                    if (age == null || age <= 0) {
+                                      return 'Please enter a valid age';
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          //Gender
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Gender',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                DropdownButtonFormField<String>(
+                                  value: _selectedGender,
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.horizontal(
+                                        left: Radius.circular(10),
+                                        right: Radius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                  items: _genderList
+                                      .map(
+                                        (g) => DropdownMenuItem(
+                                          value: g,
+                                          child: Text(g),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedGender = value;
+                                      if (value != 'Other') {
+                                        _genderController.text = '';
+                                      }
+                                    });
+                                  },
+                                  validator: (value) {
+                                    return null;
+                                  },
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                if (_selectedGender == 'Other')
+                                  TextFormField(
+                                    controller: _genderController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Please Specify',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator: (value) {
+                                      if (_selectedGender == 'Other' &&
+                                          (value == null ||
+                                              value.trim().isEmpty)) {
+                                        return 'Please provide your Gender';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                              ],
                             ),
                           ),
                         ],
