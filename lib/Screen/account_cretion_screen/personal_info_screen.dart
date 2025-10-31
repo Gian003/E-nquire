@@ -95,27 +95,37 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
                 const SizedBox(height: 20),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/Security Lock.png',
-                      width: 30,
-                      height: 30,
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 228, 237, 255),
+                    borderRadius: BorderRadius.horizontal(
+                      left: Radius.circular(10),
+                      right: Radius.circular(10),
                     ),
-
-                    const SizedBox(width: 10),
-
-                    Text(
-                      'Your Information is safe and secure',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 15,
-                        fontWeight: FontWeight.normal,
-                        color: Color(0xFF2F5899),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/Security Lock.png',
+                        width: 30,
+                        height: 30,
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(width: 20),
+
+                      Text(
+                        'Your Information is safe and secure',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xFF2F5899),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 20),
