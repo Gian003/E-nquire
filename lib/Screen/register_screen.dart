@@ -19,16 +19,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  //Password Variables
+  // Password Variables
   bool _obscurePassword = true;
 
-  //Address Controller
+  // Address Controller
   final TextEditingController _streetController = TextEditingController();
   final TextEditingController _barangayController = TextEditingController();
   final TextEditingController _municipalController = TextEditingController();
   final TextEditingController _provinceController = TextEditingController();
 
-  //Gender Variables
+  // Gender Variables
   late final TextEditingController _genderController;
   late final bool _ownsGenderController;
 
@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onRegisterPressed() {
-    if (_formKey.currentState?.validate() ?? false) {
+    if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
@@ -135,13 +135,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 40),
 
-                  // Name Fields
+                  // Email and Phone Number Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-
                     children: [
                       Text(
-                        'Name',
+                        'Email or Phone Number',
                         style: TextStyle(
                           fontFamily: 'Montserrat',
                           fontSize: 16,
@@ -149,341 +148,156 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _firstnameController,
-                              decoration: InputDecoration(
-                                hintText: 'First Name',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(10),
-                                    right: Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter your first name';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-
-                          const SizedBox(width: 20),
-
-                          Expanded(
-                            child: TextFormField(
-                              controller: _lastnameController,
-                              decoration: InputDecoration(
-                                hintText: 'Last Name',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(10),
-                                    right: Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter your last name';
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      //Age and Gender
-                      Row(
-                        children: [
-                          //Age
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Age',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                TextFormField(
-                                  controller: _ageController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter your age',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.horizontal(
-                                        left: Radius.circular(10),
-                                        right: Radius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Please enter your age';
-                                    }
-
-                                    final age = int.tryParse(value);
-
-                                    if (age == null || age <= 0) {
-                                      return 'Please enter a valid age';
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          //Gender
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Gender',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 5),
-
-                                DropdownButtonFormField<String>(
-                                  value: _selectedGender,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.horizontal(
-                                        left: Radius.circular(10),
-                                        right: Radius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                  items: _genderList
-                                      .map(
-                                        (g) => DropdownMenuItem(
-                                          value: g,
-                                          child: Text(g),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedGender = value;
-                                      if (value != 'Other') {
-                                        _genderController.text = '';
-                                      }
-                                    });
-                                  },
-                                  validator: (value) {
-                                    return null;
-                                  },
-                                ),
-
-                                const SizedBox(height: 5),
-
-                                if (_selectedGender == 'Other')
-                                  TextFormField(
-                                    controller: _genderController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Please Specify',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator: (value) {
-                                      if (_selectedGender == 'Other' &&
-                                          (value == null ||
-                                              value.trim().isEmpty)) {
-                                        return 'Please provide your Gender';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Email and Phone Number Field
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Email or Phone Number',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              hintText: 'Enter your email or phone number',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(10),
-                                  right: Radius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Password Field
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Password',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              hintText: 'Enter your password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(10),
-                                  right: Radius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Confirm Password Field
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Confirm Password',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          TextFormField(
-                            controller: _confirmPasswordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              hintText: 'Confirm your password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(10),
-                                  right: Radius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      // Register Button
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Registration Successful'),
-                              ),
-                            );
-                          }
-                          Navigator.pushReplacementNamed(context, '/home');
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2F5899),
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your email or phone number',
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.horizontal(
                               left: Radius.circular(10),
                               right: Radius.circular(10),
                             ),
                           ),
                         ),
+                      ),
+                    ],
+                  ),
 
-                        child: Text(
-                          'Register',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  const SizedBox(height: 25),
+
+                  // Password Field
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Password',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 5),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Alrready have an Account?',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                              right: Radius.circular(10),
                             ),
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                          const SizedBox(width: 5),
+                  const SizedBox(height: 25),
 
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacementNamed(context, 'login');
-                            },
+                  // Confirm Password Field
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Confirm Password',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
-                            child: Text(
-                              'Sign in',
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                color: Color(0xFF2F5899),
-                              ),
+                      const SizedBox(height: 5),
+
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Confirm your password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                              right: Radius.circular(10),
                             ),
                           ),
-                        ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Register Button
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Registration Successful'),
+                          ),
+                        );
+                      }
+                      Navigator.pushReplacementNamed(context, '/home');
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2F5899),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(10),
+                          right: Radius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    child: Text(
+                      'Register',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Alrready have an Account?',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+
+                      const SizedBox(width: 5),
+
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacementNamed(context, 'login');
+                        },
+
+                        child: Text(
+                          'Sign in',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF2F5899),
+                          ),
+                        ),
                       ),
                     ],
                   ),

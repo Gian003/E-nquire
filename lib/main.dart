@@ -6,6 +6,7 @@ import 'package:enquire/Screen/on_boarding_screen.dart';
 import 'package:enquire/Screen/login_screen.dart';
 import 'package:enquire/Screen/register_screen.dart';
 import 'package:enquire/Screen/verify_screen.dart';
+import 'package:enquire/Screen/account_cretion_screen/account_creation_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,14 +27,15 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/register',
+        initialRoute: '/account_creation',
         routes: {
           // '/': (context) => SplashScreenWrapper(),
           // '/onboarding': (context) => OnBoardingScreen(),
           // '/home': (context) => MyHomePage(),
           // '/login': (context) => LoginScreen(),
-          '/register': (context) => RegisterScreen(),
+          // '/register': (context) => RegisterScreen(),
           // '/verify': (context) => VerifyScreen(),
+          '/account_creation': (context) => AccountCreationScreen(),
         },
       ),
     );
