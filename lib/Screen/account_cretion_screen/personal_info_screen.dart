@@ -103,6 +103,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       left: Radius.circular(10),
                       right: Radius.circular(10),
                     ),
+                    border: Border.fromBorderSide(
+                      BorderSide(
+                        color: const Color.fromARGB(255, 200, 218, 254),
+                        width: 1,
+                      ),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -113,7 +119,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         height: 30,
                       ),
 
-                      const SizedBox(width: 20),
+                      const SizedBox(width: 10),
 
                       Text(
                         'Your Information is safe and secure',
