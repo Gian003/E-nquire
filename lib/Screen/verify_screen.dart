@@ -46,6 +46,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Verification successful!')));
+      Navigator.pushReplacementNamed(context, '/account_creation');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid verification code')),
@@ -146,7 +147,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 20,
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),

@@ -8,6 +8,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailCotnroller = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -87,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     children: [
                       Text(
-                        'Password',
+                        'Username',
                         style: TextStyle(
                           fontFamily: 'Montserrat',
                           fontSize: 15,
@@ -141,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Enter your password',
                           border: const OutlineInputBorder(
@@ -151,10 +152,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           suffixIcon: IconButton(
-                            icon: const Icon(Icons.visibility_off),
+                            icon: _obscurePassword
+                                ? const Icon(Icons.visibility_off)
+                                : const Icon(Icons.visibility),
                             onPressed: () {
                               setState(() {
                                 // Toggle password visibility
+                                _obscurePassword = !_obscurePassword;
                               });
                             },
                           ),
@@ -192,30 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Login button
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Invalid email or password'),
-                          ),
-                        );
-                      } else {
-                        String email = _emailCotnroller.text;
-                        String password = _passwordController.text;
-
-                        if (email == "test@example.com" &&
-                            password == "12345678") {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Invalid email or password'),
-                            ),
-                          );
-                        }
-                      }
-                    },
-
+                    onPressed: () => _login(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2F5899),
                       foregroundColor: Colors.white,
@@ -228,7 +209,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                    child: Text('Login', style: TextStyle(fontSize: 20)),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 15),

@@ -5,7 +5,6 @@ class PersonalInfoScreen extends StatefulWidget {
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
   final TextEditingController? genderController;
-  final bool ownsGenderController;
 
   const PersonalInfoScreen({
     Key? key,
@@ -13,7 +12,6 @@ class PersonalInfoScreen extends StatefulWidget {
     required this.firstNameController,
     required this.lastNameController,
     required this.genderController,
-    required this.ownsGenderController,
   }) : super(key: key);
 
   @override
@@ -21,6 +19,7 @@ class PersonalInfoScreen extends StatefulWidget {
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
+  // List of gender options
   final List<String> _genderList = [
     'Male',
     'Female',
@@ -28,13 +27,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     'Other',
     'Prefer not to say',
   ];
+
+  // Stores the gender selected by the user
+  String? _selectedGender;
+
+  // Stores the gender text field controller
   late final TextEditingController _genderController;
   late final bool _ownsGenderController;
-  String? _selectedGender;
 
   @override
   void initState() {
     super.initState();
+    // Initialize the gender text field controller
     if (widget.genderController == null) {
       _genderController = TextEditingController();
       _ownsGenderController = true;
@@ -42,6 +46,14 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       _genderController = widget.genderController!;
       _ownsGenderController = false;
     }
+  }
+
+  @override
+  void dispose() {
+    if (_ownsGenderController) {
+      _genderController.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -62,12 +74,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       'Let\'s get you started',
                       style: TextStyle(
                         fontFamily: 'Montserrat',
-                        fontSize: 25,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    const SizedBox(height: 71),
+                    const SizedBox(height: 30),
 
                     Text(
                       'What\'s your full name?',
@@ -110,6 +122,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       ),
                     ),
                   ),
+
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -160,6 +173,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             controller: widget.firstNameController,
                             decoration: InputDecoration(
                               hintText: 'First Name',
+                              contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.horizontal(
                                   left: Radius.circular(10),
@@ -183,6 +197,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             controller: widget.lastNameController,
                             decoration: InputDecoration(
                               hintText: 'Last Name',
+                              contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.horizontal(
                                   left: Radius.circular(10),
@@ -194,6 +209,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your last name';
                               }
+                              return null;
                             },
                           ),
                         ),
@@ -205,70 +221,64 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 const SizedBox(height: 24),
 
                 // Gender Field
-                Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: const Text(
-                        'Gender',
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    'Gender',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
                     ),
-
-                    const SizedBox(height: 10),
-
-                    DropdownButtonFormField<String>(
-                      value: _selectedGender,
-                      decoration: InputDecoration(
-                        labelText: 'Gender',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal(
-                            left: Radius.circular(10),
-                            right: Radius.circular(10),
-                          ),
-                        ),
-                      ),
-                      items: _genderList
-                          .map(
-                            (g) => DropdownMenuItem(value: g, child: Text(g)),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedGender = value;
-                          if (value != 'Other') {
-                            _genderController.text = '';
-                          }
-                        });
-                      },
-                      validator: (value) {
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    if (_selectedGender == 'Other')
-                      TextFormField(
-                        controller: _genderController,
-                        decoration: InputDecoration(
-                          labelText: 'Please Specify',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (_selectedGender == 'Other' &&
-                              (value == null || value.trim().isEmpty)) {
-                            return 'Please provide your Gender';
-                          }
-                          return null;
-                        },
-                      ),
-                  ],
+                  ),
                 ),
+
+                const SizedBox(height: 10),
+
+                DropdownButtonFormField<String>(
+                  value: _selectedGender,
+                  decoration: InputDecoration(
+                    labelText: 'Gender',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.horizontal(
+                        left: Radius.circular(10),
+                        right: Radius.circular(10),
+                      ),
+                    ),
+                  ),
+                  items: _genderList
+                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedGender = value;
+                      if (value != 'Other') {
+                        _genderController.text = '';
+                      }
+                    });
+                  },
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 5),
+
+                if (_selectedGender == 'Other')
+                  TextFormField(
+                    controller: _genderController,
+                    decoration: InputDecoration(
+                      labelText: 'Please Specify',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (_selectedGender == 'Other' &&
+                          (value == null || value.trim().isEmpty)) {
+                        return 'Please provide your Gender';
+                      }
+                      return null;
+                    },
+                  ),
               ],
             ),
           ),

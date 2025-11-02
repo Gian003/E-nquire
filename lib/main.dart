@@ -7,6 +7,7 @@ import 'package:enquire/Screen/login_screen.dart';
 import 'package:enquire/Screen/register_screen.dart';
 import 'package:enquire/Screen/verify_screen.dart';
 import 'package:enquire/Screen/account_cretion_screen/account_creation_screen.dart';
+import 'package:enquire/Screen/home_screen.dart';
 
 void main() {
   runApp(MyApp());

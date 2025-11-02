@@ -9,11 +9,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final String emailTest = "test@example.com";
+  final String passwordTest = "12345678";
+  final String confirmPasswordTest = "12345678";
+
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _firstnameController = TextEditingController();
-  final TextEditingController _lastnameController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -21,54 +22,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Password Variables
   bool _obscurePassword = true;
-
-  // Address Controller
-  final TextEditingController _streetController = TextEditingController();
-  final TextEditingController _barangayController = TextEditingController();
-  final TextEditingController _municipalController = TextEditingController();
-  final TextEditingController _provinceController = TextEditingController();
-
-  // Gender Variables
-  late final TextEditingController _genderController;
-  late final bool _ownsGenderController;
-
-  final List<String> _genderList = [
-    'Male',
-    'Female',
-    'Non-Binary',
-    'Other',
-    'Prefer not to say',
-  ];
-  String? _selectedGender;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.genderController == null) {
-      _genderController = TextEditingController();
-      _ownsGenderController = true;
-    } else {
-      _genderController = widget.genderController!;
-      _ownsGenderController = false;
-    }
-  }
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    _firstnameController.dispose();
-    _lastnameController.dispose();
-    _ageController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-
-    _streetController.dispose();
-    _barangayController.dispose();
-    _municipalController.dispose();
-    _provinceController.dispose();
-
-    if (_ownsGenderController) _genderController.dispose();
-
     super.dispose();
   }
 
@@ -77,7 +37,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/verify');
+    }
+  }
+
+  bool _isEmailValid(String value) {
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    return emailRegex.hasMatch(value);
+  }
+
+  bool _isPhoneValid(String value) {
+    final phoneRegex = RegExp(r'^\d{7,15}$');
+    return phoneRegex.hasMatch(value);
+  }
+
+  void _register() {
+    if (_formKey.currentState!.validate()) {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      String confirmPassword = _confirmPasswordController.text;
+
+      if (email == emailTest &&
+          ((password == passwordTest) &&
+              (confirmPassword == confirmPasswordTest))) {
+        Navigator.pushReplacementNamed(context, '/verify');
+      }
     }
   }
 
@@ -161,6 +145,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email or phone number';
+                          }
+
+                          final v = value.trim();
+
+                          if (_isEmailValid(v)) {
+                            return null;
+                          }
+
+                          if (_isPhoneValid(v)) {
+                            return null;
+                          }
+
+                          return 'Please enter a valid email or phone number';
+                        },
                       ),
                     ],
                   ),
@@ -184,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Enter your password',
                           border: OutlineInputBorder(
@@ -192,6 +193,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               left: Radius.circular(10),
                               right: Radius.circular(10),
                             ),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: _obscurePassword
+                                ? const Icon(Icons.visibility_off)
+                                : const Icon(Icons.visibility),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
                         ),
                       ),
@@ -217,7 +228,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: _confirmPasswordController,
-                        obscureText: true,
+                        obscureText: _obscureConfirmPassword,
                         decoration: InputDecoration(
                           hintText: 'Confirm your password',
                           border: OutlineInputBorder(
@@ -225,6 +236,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               left: Radius.circular(10),
                               right: Radius.circular(10),
                             ),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: _obscurePassword
+                                ? const Icon(Icons.visibility_off)
+                                : const Icon(Icons.visibility),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
                           ),
                         ),
                       ),
@@ -235,17 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Register Button
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Registration Successful'),
-                          ),
-                        );
-                      }
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
-
+                    onPressed: () => _register(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2F5899),
                       foregroundColor: Colors.white,
@@ -286,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushReplacementNamed(context, 'login');
+                          Navigator.pushReplacementNamed(context, '/login');
                         },
 
                         child: Text(
