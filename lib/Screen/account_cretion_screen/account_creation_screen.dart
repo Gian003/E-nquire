@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'personal_info_screen.dart';
+import 'birthDate_screen.dart';
 
 class AccountCreationScreen extends StatefulWidget {
   const AccountCreationScreen({Key? key}) : super(key: key);
@@ -11,15 +12,18 @@ class AccountCreationScreen extends StatefulWidget {
 
 class _AccountCreationScreenState extends State<AccountCreationScreen> {
   final PageController _pageController = PageController();
+  final _formKey = GlobalKey<FormState>();
 
   int _currentStep = 0;
 
-  //Controllers for Personal Info inputs
+  // Personal Info inputs
   final _formkey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _genderController = TextEditingController();
-  final bool _ownsGenderController = false;
+
+  // BrithDate Info inputs
+  DateTime? _pickBirthDate;
 
   List<Widget> get _rawPages => [
     PersonalInfoScreen(
@@ -27,7 +31,11 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
       firstNameController: _firstNameController,
       lastNameController: _lastNameController,
       genderController: _genderController,
-      ownsGenderController: _ownsGenderController,
+    ),
+    BirthDateScreen(
+      onDateChanged: (date) {
+        setState(() => _pickBirthDate = date);
+      },
     ),
   ];
 
@@ -52,6 +60,7 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
     _pageController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _genderController.dispose();
     super.dispose();
   }
 
@@ -62,6 +71,22 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
         return;
       }
       _formkey.currentState?.save();
+    }
+
+    //BirthDate Validation
+    if (_currentStep == 1) {
+      if (_pickBirthDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please pck your birthdate')),
+        );
+        return;
+      }
+      final age = DateTime.now().difference(_pickBirthDate!).inDays ~/ 365;
+      if (age < 18) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must be at least 18 years old')),
+        );
+      }
     }
 
     if (_currentStep < lastIndex) {
@@ -83,7 +108,7 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
     }
   }
 
-  void _confirmRegistrtion() {
+  void _confirmRegistration() {
     //Sends to DB later
     debugPrint(
       'Registered: ${_firstNameController.text} ${_lastNameController.text}',
@@ -142,7 +167,7 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_currentStep == lastIndex) {
-                          _confirmRegistrtion();
+                          _confirmRegistration();
                         } else {
                           _nextPage();
                         }
