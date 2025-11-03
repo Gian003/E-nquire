@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/',
+        initialRoute: '/account_creation',
         routes: {
           '/': (context) => SplashScreenWrapper(),
           '/onboarding': (context) => OnBoardingScreen(),
