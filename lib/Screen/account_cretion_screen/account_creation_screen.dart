@@ -1,6 +1,8 @@
+import 'package:enquire/Screen/account_cretion_screen/address_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'personal_info_screen.dart';
+import 'birthDate_screen.dart';
 import 'birthDate_screen.dart';
 
 class AccountCreationScreen extends StatefulWidget {
@@ -37,6 +39,7 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
         setState(() => _pickBirthDate = date);
       },
     ),
+    AddressScreen(),
   ];
 
   Widget _wrapPage(Widget child) {

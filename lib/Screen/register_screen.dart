@@ -32,15 +32,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _onRegisterPressed() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
-      Navigator.pushReplacementNamed(context, '/verify');
-    }
-  }
-
   bool _isEmailValid(String value) {
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     return emailRegex.hasMatch(value);
@@ -205,6 +196,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -249,6 +246,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),

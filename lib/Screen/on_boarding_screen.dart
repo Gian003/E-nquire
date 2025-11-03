@@ -118,7 +118,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 20,
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
