@@ -235,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                           suffixIcon: IconButton(
-                            icon: _obscurePassword
+                            icon: _obscureConfirmPassword
                                 ? const Icon(Icons.visibility_off)
                                 : const Icon(Icons.visibility),
                             onPressed: () {

@@ -142,8 +142,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                           .toList(),
                       onChanged: (value) =>
                           setState(() => _selectedMonth = value),
-                      validator: (value) =>
-                          value == null ? 'Please select a month' : null,
+                      // validator: (value) =>
+                      //     value == null ? 'Please select a month' : null,
                     ),
                   ),
 
@@ -169,8 +169,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                           .toList(),
                       onChanged: (value) =>
                           setState(() => _selectedDay = value),
-                      validator: (value) =>
-                          value == null ? 'Please select a day' : null,
+                      // validator: (value) =>
+                      //     value == null ? 'Please select a day' : null,
                     ),
                   ),
 
@@ -196,8 +196,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                           .toList(),
                       onChanged: (value) =>
                           setState(() => _selectedYear = value),
-                      validator: (value) =>
-                          value == null ? 'Please select a year' : null,
+                      // validator: (value) =>
+                      //     value == null ? 'Please select a year' : null,
                     ),
                   ),
                 ],

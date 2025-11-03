@@ -181,12 +181,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your first name';
-                              }
-                              return null;
-                            },
+                            // validator: (value) {
+                            //   if (value == null || value.trim().isEmpty) {
+                            //     return 'Please enter your first name';
+                            //   }
+                            //   return null;
+                            // },
                           ),
                         ),
 
@@ -205,12 +205,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your last name';
-                              }
-                              return null;
-                            },
+                            // validator: (value) {
+                            //   if (value == null || value.trim().isEmpty) {
+                            //     return 'Please enter your last name';
+                            //   }
+                            //   return null;
+                            // },
                           ),
                         ),
                       ],
@@ -257,9 +257,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       }
                     });
                   },
-                  validator: (value) {
-                    return null;
-                  },
+                  // validator: (value) {
+                  //   return null;
+                  // },
                 ),
 
                 const SizedBox(height: 5),
@@ -271,13 +271,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       labelText: 'Please Specify',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (_selectedGender == 'Other' &&
-                          (value == null || value.trim().isEmpty)) {
-                        return 'Please provide your Gender';
-                      }
-                      return null;
-                    },
+                    // validator: (value) {
+                    //   if (_selectedGender == 'Other' &&
+                    //       (value == null || value.trim().isEmpty)) {
+                    //     return 'Please provide your Gender';
+                    //   }
+                    //   return null;
+                    // },
                   ),
               ],
             ),
