@@ -35,9 +35,36 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            //Skip Button
+            GestureDetector(
+              onTap: () => Navigator.pushReplacementNamed(context, '/register'),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Skip',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(width: 5),
+
+                    Icon(Icons.skip_next_sharp, color: Color(0xFF2E2F2B)),
+                  ],
+                ),
+              ),
+            ),
+
             /// The PageView that displays the pages.
             Expanded(
               child: PageView(
