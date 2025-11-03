@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'personal_info_screen.dart';
 import 'birthDate_screen.dart';
-import 'birthDate_screen.dart';
+import 'address_screen.dart';
 
 class AccountCreationScreen extends StatefulWidget {
   const AccountCreationScreen({Key? key}) : super(key: key);
@@ -14,18 +14,24 @@ class AccountCreationScreen extends StatefulWidget {
 
 class _AccountCreationScreenState extends State<AccountCreationScreen> {
   final PageController _pageController = PageController();
-  final _formKey = GlobalKey<FormState>();
+  final _formkey = GlobalKey<FormState>();
 
   int _currentStep = 0;
 
   // Personal Info inputs
-  final _formkey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _genderController = TextEditingController();
 
   // BrithDate Info inputs
   DateTime? _pickBirthDate;
+
+  //Address Info inputs
+  final _streetController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _provinceController = TextEditingController();
+  final _zipCodeController = TextEditingController();
+  final _countryController = TextEditingController();
 
   List<Widget> get _rawPages => [
     PersonalInfoScreen(
@@ -39,7 +45,14 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
         setState(() => _pickBirthDate = date);
       },
     ),
-    AddressScreen(),
+    AddressScreen(
+      formKey: _formkey,
+      streetController: _streetController,
+      cityController: _cityController,
+      provinceController: _provinceController,
+      zipCodeController: _zipCodeController,
+      countryController: _countryController,
+    ),
   ];
 
   Widget _wrapPage(Widget child) {
@@ -77,34 +90,24 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
     }
 
     //BirthDate Validation
-    if (_currentStep == 1) {
-      if (_pickBirthDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please pck your birthdate')),
-        );
-        return;
-      }
-      final age = DateTime.now().difference(_pickBirthDate!).inDays ~/ 365;
-      if (age < 18) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must be at least 18 years old')),
-        );
-      }
-    }
+    // if (_currentStep == 1) {
+    //   if (_pickBirthDate == null) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please pck your birthdate')),
+    //     );
+    //     return;
+    //   }
+    //   final age = DateTime.now().difference(_pickBirthDate!).inDays ~/ 365;
+    //   if (age < 18) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('You must be at least 18 years old')),
+    //     );
+    //   }
+    // }
 
     if (_currentStep < lastIndex) {
       setState(() => _currentStep++);
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _previousPage() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep--);
-      _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
@@ -143,26 +146,6 @@ class _AccountCreationScreenState extends State<AccountCreationScreen> {
             children: [
               Row(
                 children: [
-                  if (_currentStep > 0)
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _previousPage,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(0, 50),
-                          backgroundColor: Color(0xFF2F5899),
-                        ),
-                        child: const Text(
-                          'Back',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-
                   if (_currentStep > 0 && _currentStep <= lastIndex)
                     const SizedBox(width: 10),
 
