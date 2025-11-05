@@ -31,52 +31,13 @@ class MyHomePage extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // Column(
-              //   children: [
-              //     SizedBox(
-              //       width: 325,
-              //       height: 110,
-              //       child: ElevatedButton(
-              //         style: ElevatedButton.styleFrom(
-              //           shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.horizontal(
-              //               left: Radius.circular(10),
-              //               right: Radius.circular(10),
-              //             ),
-              //           ),
-              //         ),
-              //         onPressed: () {},
-              //         child: Row(
-              //           children: [
-              //             Image.asset(
-              //               'assets/images/notificationpng',
-              //               height: 40,
-              //               width: 40,
-              //             ),
-
-              //             const SizedBox(width: 35),
-
-              //             Text(
-              //               'Notifications',
-              //               style: TextStyle(
-              //                 fontFamily: 'Montserrat',
-              //                 fontSize: 20,
-              //                 fontWeight: FontWeight.bold,
-              //                 color: Colors.black,
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              SizedBox(
-                width: 325,
-                height: 110,
-                child: Column(
-                  children: [
-                    ElevatedButton(
+              Column(
+                children: [
+                  //Notifications Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 110,
+                    child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.horizontal(
@@ -89,15 +50,15 @@ class MyHomePage extends StatelessWidget {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/notification.png',
+                            'assets/images/Notification.png',
                             height: 40,
                             width: 40,
                           ),
 
-                          const SizedBox(width: 20),
+                          const SizedBox(width: 35),
 
                           Text(
-                            'Schedule',
+                            'Notifications',
                             style: TextStyle(
                               fontFamily: 'Montserrat',
                               fontSize: 20,
@@ -108,8 +69,128 @@ class MyHomePage extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  //Request Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 110,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.horizontal(
+                            left: Radius.circular(10),
+                            right: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/Document.png',
+                            width: 40,
+                            height: 40,
+                          ),
+
+                          const SizedBox(width: 35),
+
+                          Text(
+                            'Request Document',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  //My Profile Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 110,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.horizontal(
+                            left: Radius.circular(10),
+                            right: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/Hourglass.png',
+                            width: 40,
+                            height: 40,
+                          ),
+
+                          const SizedBox(width: 35),
+
+                          Text(
+                            'My Requests',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  //Account Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 110,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.horizontal(
+                            left: Radius.circular(10),
+                            right: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/User.png',
+                            width: 40,
+                            height: 40,
+                          ),
+
+                          const SizedBox(width: 35),
+
+                          Text(
+                            'Account',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
