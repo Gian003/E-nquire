@@ -8,6 +8,7 @@ import 'package:enquire/Screen/register_screen.dart';
 import 'package:enquire/Screen/verify_screen.dart';
 import 'package:enquire/Screen/account_cretion_screen/account_creation_screen.dart';
 import 'package:enquire/Screen/home_screen.dart';
+import 'package:enquire/Screen/request_flow/request_document.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/home',
+        initialRoute: '/request_document',
         routes: {
           // '/': (context) => SplashScreenWrapper(),
           // '/onboarding': (context) => OnBoardingScreen(),
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
           // '/register': (context) => RegisterScreen(),
           // '/verify': (context) => VerifyScreen(),
           // '/account_creation': (context) => AccountCreationScreen(),
+          '/request_document': (context) => RequestDocument(),
         },
       ),
     );

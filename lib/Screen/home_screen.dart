@@ -1,3 +1,4 @@
+import 'package:enquire/Screen/request_flow/request_document.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatelessWidget {
@@ -86,7 +87,14 @@ class MyHomePage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RequestDocument(),
+                          ),
+                        );
+                      },
                       child: Row(
                         children: [
                           Image.asset(
