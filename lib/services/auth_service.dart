@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:enquire/API/config.dart';
 
-class AuthServices {
+class AuthService {
   /// Registers a user with the given email and password.
   ///
   /// This function sends a POST request to the register endpoint
