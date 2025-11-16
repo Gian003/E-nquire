@@ -129,7 +129,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                         //   ),
                         // ),
                       ),
-                      value: _selectedMonth,
+                      initialValue: _selectedMonth,
                       items: List.generate(12, (i) => i + 1)
                           .map(
                             (m) => DropdownMenuItem(
