@@ -1,139 +1,202 @@
-import 'dart:convert'; // For encoding and decoding JSON data.
-import 'dart:io'; // For working with files (e.g., uploading ID proof).
-import 'package:http/http.dart' as http; // HTTP client for making requests.
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for sensitive data.
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // For loading environment variables (e.g., API URL).
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// ApiService is a singleton class responsible for all API-related operations.
-/// It handles authentication, user data, and certificate requests.
 class ApiService {
-  // --- Singleton Pattern Implementation ---
-  // Ensures only one instance of ApiService exists throughout the app.
-
-  /// The single instance of ApiService (private).
   static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
 
-  /// The base URL for the API, loaded from environment variables.
-  /// If not set, defaults to 'http://localhost:8000/api'.
   static String baseUrl = dotenv.get(
     'API_URL',
     fallback: 'http://localhost:8000/api',
   );
-
-  /// Secure storage instance for storing sensitive data like tokens.
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  /// Factory constructor returns the singleton instance.
-  factory ApiService() => _instance;
-
-  /// Private internal constructor (prevents external instantiation).
-  ApiService._internal();
-
-  // --- Helper Methods ---
-
-  /// Builds HTTP headers for requests.
-  /// Adds 'Authorization' header if a token is stored.
-  /// Adds 'Content-Type: application/json' unless files are being uploaded.
   Future<Map<String, String>> _getHeaders({bool hasFiles = false}) async {
-    final token = await _storage.read(
-      key: 'auth_token',
-    ); // Read token from secure storage.
-    final headers = <String, String>{
-      'Accept': 'application/json', // Always accept JSON responses.
+    final token = await _storage.read(key: 'auth_token');
+    final headers = {
+      if (!hasFiles) 'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
-    if (!hasFiles) {
-      headers['Content-Type'] =
-          'application/json'; // Set content type for JSON requests.
-    }
+
     if (token != null) {
-      headers['Authorization'] = 'Bearer $token'; // Add token if available.
+      headers['Authorization'] = 'Bearer $token';
     }
+
     return headers;
   }
 
-  /// Handles HTTP requests in a generic way.
-  /// Supports GET, POST, PUT, DELETE, and file uploads.
-  /// Returns the HTTP response.
   Future<http.Response> _handleRequest(
     String method,
-    String endpoint, {
+    String endPoint, {
     dynamic data,
     bool hasFiles = false,
   }) async {
-    final headers = await _getHeaders(
-      hasFiles: hasFiles,
-    ); // Get appropriate headers.
-    final url = Uri.parse('$baseUrl/$endpoint'); // Build full URL.
-    http.Response response;
+    try {
+      final headers = await _getHeaders(hasFiles: hasFiles);
+      final url = Uri.parse('$baseUrl/$endPoint');
 
-    switch (method) {
-      case 'GET':
-        // Standard GET request.
-        response = await http.get(url, headers: headers);
-        break;
-      case 'POST':
-        if (hasFiles && data is http.MultipartRequest) {
-          // If uploading files, send as multipart/form-data.
-          response = http.Response.fromStream(await data.send());
-        } else {
-          // Standard POST with JSON body.
-          response = await http.post(
+      http.Response response;
+
+      switch (method) {
+        case 'GET':
+          response = await http.get(url, headers: headers);
+        case 'POST':
+          if (hasFiles && data is http.MultipartRequest) {
+            response = await http.Response.fromStream(await data.send());
+          } else {
+            response = await http.post(
+              url,
+              headers: headers,
+              body: hasFiles ? data : json.encode(data),
+            );
+          }
+        case 'PUT':
+          response = await http.put(
             url,
             headers: headers,
             body: hasFiles ? data : json.encode(data),
           );
-        }
-        break;
-      case 'PUT':
-        // PUT request for updating resources.
-        response = await http.put(
-          url,
-          headers: headers,
-          body: hasFiles ? data : json.encode(data),
-        );
-        break;
-      case 'DELETE':
-        // DELETE request for removing resources.
-        response = await http.delete(url, headers: headers);
-        break;
-      default:
-        // If method is not supported, throw an error.
-        throw Exception('Unsupported HTTP method');
+        case 'DELETE':
+          response = await http.delete(url, headers: headers);
+        default:
+          throw Exception('Unsupported HTTP method');
+      }
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('Network error: $e');
     }
-    return response;
   }
 
-  // --- API Methods ---
+  http.Response _handleResponse(http.Response response) {
+    switch (response.statusCode) {
+      case 200:
+      case 201:
+        return response;
+      case 400:
+        throw Exception('Bad request');
+      case 401:
+        throw Exception('Unauthorized - Please login again');
+      case 403:
+        throw Exception('Forbidden - Access denied');
+      case 404:
+        throw Exception('Resource not found');
+      case 422:
+        throw Exception('Validation failed: ${response.body}');
+      case 500:
+        throw Exception('Server error - Please try again later');
+      default:
+        throw Exception('Request failed with status: ${response.statusCode}');
+    }
+  }
 
-  /// Submits a certificate request to the server.
-  /// [request] should be a MultipartRequest containing form fields and files.
-  /// Returns the server's response as a decoded JSON map.
-  Future<Map<String, dynamic>> submitCertificateRequest(dynamic request) async {
+  //Auth Methods
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final response = await _handleRequest(
+      'POST',
+      'login',
+      data: {'email': email, 'password': password},
+    );
+
+    final data = json.decode(response.body);
+
+    if (data['success'] == true) {
+      await _storage.write(
+        key: 'auth_token',
+        value: data['data']['access_token'],
+      );
+      await _storage.write(
+        key: 'user_data',
+        value: json.encode(data['data']['user']),
+      );
+    }
+
+    return data;
+  }
+
+  Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
+    final response = await _handleRequest('POST', 'register', data: userData);
+
+    final data = json.decode(response.body);
+
+    if (data['success'] == true) {
+      await _storage.write(
+        key: 'auth_token',
+        value: data['data']['access_token'],
+      );
+      await _storage.write(
+        key: 'user_data',
+        value: json.encode(data['data']['user']),
+      );
+    }
+
+    return data;
+  }
+
+  Future<void> logout() async {
+    try {
+      await _handleRequest('POST', 'logout');
+    } catch (e) {
+      print('Logout error: $e');
+    } finally {
+      await _storage.delete(key: 'auth_token');
+      await _storage.delete(key: 'user_data');
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserProfile() async {
+    final response = await _handleRequest('GET', 'user');
+    return json.decode(response.body);
+  }
+
+  //Certificate Request Methods
+  Future<Map<String, dynamic>> submitCertificateRequest({
+    required Map<String, dynamic> requestData,
+    required File idProof,
+  }) async {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/certificate-requests'),
+    );
+
+    //Add headers
+    final token = await _storage.read(key: 'auth_token');
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+
+    //Add files
+    request.files.add(
+      await http.MultipartFile.fromPath('id_proof', idProof.path),
+    );
+
+    requestData.forEach((key, value) {
+      request.fields[key] = value.toString();
+    });
+
     final response = await _handleRequest(
       'POST',
       'certificate-requests',
       data: request,
-      hasFiles: true, // Indicates this is a file upload.
+      hasFiles: true,
     );
-    return json.decode(response.body); // Parse and return JSON response.
+
+    return json.decode(response.body);
   }
 
-  /// Fetches details of a specific certificate request by its [id].
-  /// Returns the server's response as a decoded JSON map.
   Future<Map<String, dynamic>> getCertificateRequest(int id) async {
     final response = await _handleRequest('GET', 'certificate-requests/$id');
-    return json.decode(response.body); // Parse and return JSON response.
+    return json.decode(response.body);
   }
 
-  /// Checks if the user is authenticated by verifying if a token exists in storage.
-  /// Returns true if a token is found, false otherwise.
   Future<bool> checkAuth() async {
     final token = await _storage.read(key: 'auth_token');
     return token != null;
   }
 
-  /// Retrieves the stored user data from secure storage.
-  /// Returns the user data as a decoded JSON map, or null if not found.
   Future<Map<String, dynamic>?> getStoredUser() async {
     final userData = await _storage.read(key: 'user_data');
     if (userData != null) {
