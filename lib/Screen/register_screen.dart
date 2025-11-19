@@ -1,8 +1,9 @@
+import 'package:enquire/services/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final TextEditingController? genderController;
-  const RegisterScreen({Key? key, this.genderController}) : super(key: key);
+  const RegisterScreen({Key? key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -16,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneContrroller = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -27,11 +29,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _emailController.dispose();
+    _phoneContrroller.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  //Validation Functions
   bool _isEmailValid(String value) {
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     return emailRegex.hasMatch(value);
@@ -42,22 +46,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return phoneRegex.hasMatch(value);
   }
 
-  void _register() {
-    if (_formKey.currentState!.validate()) {
-      String email = _emailController.text;
-      String password = _passwordController.text;
-      String confirmPassword = _confirmPasswordController.text;
+  bool _isPasswordValid(String value) {
+    return value.length >= 8;
+  }
 
-      if (email == emailTest &&
-          ((password == passwordTest) &&
-              (confirmPassword == confirmPasswordTest))) {
-        Navigator.pushReplacementNamed(context, '/verify');
+  Future<void> _register() async {
+    if (_formKey.currentState!.validate()) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      //Prepare registration data
+      final userData = {
+        'email': _emailController.text.trim(),
+        'phone': _phoneContrroller.text.trim(),
+        'password': _passwordController.text,
+        'password_confirmation': _confirmPasswordController.text,
+      };
+
+      await authProvider.register(userData);
+
+      if (authProvider.isAuthenticated) {
+        //Success - Navigate to Home Screen
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/account_creation');
+        }
+      } else {
+        print('Registration failed: ${authProvider.error}');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -110,12 +131,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 40),
 
-                  // Email and Phone Number Field
+                  //Error message display
+                  if (authProvider.error != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.red[50],
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(10),
+                          right: Radius.circular(10),
+                        ),
+                        border: Border.all(color: Colors.red),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: Text(
+                              authProvider.error!,
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Email Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Email or Phone Number',
+                        'Email Address',
                         style: TextStyle(
                           fontFamily: 'Montserrat',
                           fontSize: 16,
@@ -127,8 +187,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          hintText: 'Enter your email or phone number',
+                          hintText: 'Enter your email address',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.horizontal(
                               left: Radius.circular(10),
@@ -141,17 +202,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return 'Please enter your email or phone number';
                           }
 
-                          final v = value.trim();
-
-                          if (_isEmailValid(v)) {
+                          if (_isEmailValid(value)) {
                             return null;
                           }
 
-                          if (_isPhoneValid(v)) {
+                          return 'Please enter a valid email address';
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Phone Number',
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      TextFormField(
+                        controller: _phoneContrroller,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your phone number',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                              right: Radius.circular(10),
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your phone number';
+                          }
+
+                          if (_isPhoneValid(value)) {
                             return null;
                           }
 
-                          return 'Please enter a valid email or phone number';
+                          return 'Please enter a valid Phone number';
                         },
                       ),
                     ],
@@ -200,6 +298,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
                           }
+
+                          if (!_isPasswordValid(value)) {
+                            return 'Password must be at least 8 characters';
+                          }
+
                           return null;
                         },
                       ),
@@ -250,6 +353,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
                           }
+
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+
                           return null;
                         },
                       ),
@@ -259,32 +367,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 40),
 
                   // Register Button
-                  ElevatedButton(
-                    onPressed: () => _register(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2F5899),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.circular(10),
-                          right: Radius.circular(10),
+                  authProvider.isLoading
+                      ? SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF2F5899),
+                              ),
+                            ),
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: _register,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF2F5899),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadiusGeometry.horizontal(
+                                left: Radius.circular(10),
+                                right: Radius.circular(10),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Register',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-
-                    child: Text(
-                      'Register',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
 
                   const SizedBox(height: 20),
 
+                  //Login Redirect Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
