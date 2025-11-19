@@ -10,6 +10,9 @@ import 'package:enquire/Screen/account_cretion_screen/account_creation_screen.da
 import 'package:enquire/Screen/home_screen.dart';
 import 'package:enquire/Screen/request_flow/request_document.dart';
 
+import 'package:enquire/services/api_service.dart';
+import 'package:enquire/services/auth_provider.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -19,8 +22,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        Provider(create: (context) => ApiService()),
+      ],
       child: MaterialApp(
         title: 'E-nquire',
         theme: ThemeData(
@@ -29,20 +35,18 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/request_document',
+        initialRoute: '/',
         routes: {
-          // '/': (context) => SplashScreenWrapper(),
-          // '/onboarding': (context) => OnBoardingScreen(),
+          '/': (context) => SplashScreenWrapper(),
+          '/onboarding': (context) => OnBoardingScreen(),
           '/home': (context) => MyHomePage(),
-          // '/login': (context) => LoginScreen(),
-          // '/register': (context) => RegisterScreen(),
-          // '/verify': (context) => VerifyScreen(),
-          // '/account_creation': (context) => AccountCreationScreen(),
+          '/login': (context) => LoginScreen(),
+          '/register': (context) => RegisterScreen(),
+          '/verify': (context) => VerifyScreen(),
+          '/account_creation': (context) => AccountCreationScreen(),
           '/request_document': (context) => RequestDocument(),
         },
       ),
     );
   }
 }
-
-class MyAppState extends ChangeNotifier {}
