@@ -43,6 +43,31 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> register(Map<String, dynamic> userdata) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.register(userdata);
+
+      if (response['success'] == true) {
+        _user = response['data']['user'];
+        _isAuthenticated = true;
+        _error = null;
+      } else {
+        _error = response['message'] ?? 'Registration Failed';
+        _isAuthenticated = false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      _isAuthenticated = false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _apiService.logout();
