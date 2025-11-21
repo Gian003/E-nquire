@@ -29,6 +29,46 @@ class ApiService {
     return headers;
   }
 
+  Future<dynamic> apiCall({
+    required String method,
+    required String endPoint,
+    dynamic data,
+    bool requiresAuth = true,
+    bool hasFiles = false,
+  }) async {
+    try {
+      final headers = await _getHeaders(hasFiles: hasFiles);
+      final url = Uri.parse('$baseUrl/$endPoint');
+
+      http.Response response;
+
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await http.get(url, headers: headers);
+        case 'POST':
+          if (hasFiles && data is http.MultipartRequest) {
+            response = await http.Response.fromStream(await data.send());
+          } else {
+            response = await http.post(
+              url,
+              headers: headers,
+              body: hasFiles ? data : json.encode(data),
+            );
+          }
+        case 'PUT':
+          response = await http.put(url, headers: headers);
+        case 'DELETE':
+          response = await http.delete(url, headers: headers);
+        default:
+          throw Exception('Unsupported HTTP methdd: $method');
+      }
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
   Future<http.Response> _handleRequest(
     String method,
     String endPoint, {

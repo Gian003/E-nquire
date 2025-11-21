@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:provider/provider.dart';
+import 'package:enquire/services/auth_provider.dart';
 
 class VerifyScreen extends StatefulWidget {
   const VerifyScreen({super.key});
@@ -12,12 +14,132 @@ class _VerifyScreenState extends State<VerifyScreen> {
   String otpCode = '';
   int _remainingTime = 30;
   bool _canResend = false;
+  bool _isLoading = false;
   Timer? _timer;
+
+  String? _selectedMethod;
+  String _userEmail = '';
+  String _userPhone = '';
+  String _maskedContact = '';
 
   @override
   void initState() {
     super.initState();
     _startCountdown();
+  }
+
+  void _getUserContactInfo() {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+
+    if (args != null) {
+      _userEmail = args['email'] ?? '';
+      _userPhone = args['phone'] ?? '';
+
+      //Auto-select email or phone
+      if (_userEmail.isNotEmpty) {
+        _selectedMethod = 'email';
+        _maskedContact = _getMaskedEmail(_userEmail);
+      } else if (_userPhone.isNotEmpty) {
+        _userPhone = 'phone';
+        _maskedContact = _getMaskedPhone(_userPhone);
+      }
+
+      if (_selectedMethod != null) {
+        _sendVerificationCode();
+      }
+    }
+  }
+
+  /// This function takes an email address as a string and returns a masked version of it.
+  ///
+  /// The masked version is created by replacing all but the first two characters of the username with asterisks.
+  ///
+  /// For example, if the email address is "john.doe@example.com", the masked version would be "jo*****@example.com".
+  ///
+  /// If the email address is empty or the username has a length of two or less, the original email address is returned.
+  String _getMaskedEmail(String email) {
+    if (email.isEmpty) return '';
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+
+    final username = parts[0];
+    final domain = parts[1];
+
+    if (username.length <= 2) {
+      // If the username has a length of two or less, return the original email address
+      return email;
+    }
+
+    // Get the first two characters of the username
+    final firstTwo = username.substring(0, 2);
+
+    // Calculate the number of asterisks needed to replace the remaining characters of the username
+    final stars = '*' * (username.length - 2);
+
+    // Return the masked email address
+    return '$firstTwo$stars@$domain';
+  }
+
+  /// This function takes a phone number as a string and returns a masked version of it.
+  ///
+  /// The masked version is created by replacing all but the last four characters of the phone number with asterisks.
+  ///
+  /// For example, if the phone number is "1234567890", the masked version would be "*****6789".
+  ///
+  /// If the phone number is empty or has a length of four or less, the original phone number is returned.
+  String _getMaskedPhone(String phone) {
+    if (phone.isEmpty) return '';
+    if (phone.length <= 4) return phone;
+
+    final lastFour = phone.substring(phone.length - 4);
+    final stars = '*' * (phone.length - 4);
+    return '$stars$lastFour';
+  }
+
+  Future<void> _sendVerificationCode() async {
+    if (_selectedMethod == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      await authProvider.sendVerificationCode(
+        method: _selectedMethod!,
+        email: _userEmail,
+        phone: _userPhone,
+      );
+
+      setState(() {
+        _isLoading = false;
+        _canResend = false;
+        _remainingTime = 30;
+      });
+
+      _startCountdown();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Verification code sent to your $_selectedMethod!'),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send verification code: $e')),
+        );
+      }
+    }
   }
 
   void _startCountdown() {
@@ -41,16 +163,54 @@ class _VerifyScreenState extends State<VerifyScreen> {
     });
   }
 
-  void _verifyCode() {
-    if (otpCode == '123456') {
+  void _verifyCode() async {
+    if (otpCode.length != 6) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Verification successful!')));
-      Navigator.pushReplacementNamed(context, '/account_creation');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid verification code')),
+      ).showSnackBar(SnackBar(content: Text('Please enter the 6-digit code')));
+
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      final result = await authProvider.verifyCode(
+        code: otpCode,
+        method: _selectedMethod!,
       );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result['success'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Verification successful')));
+          Navigator.pushReplacementNamed(context, '/acount_creation');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Invalid verification code')));
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Verification failed: $e')));
+      }
     }
   }
 
@@ -59,8 +219,20 @@ class _VerifyScreenState extends State<VerifyScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Resending code...')));
+      _sendVerificationCode();
       _startCountdown();
     }
+  }
+
+  void _selectMethod(String method) {
+    setState(() {
+      _selectedMethod = method;
+      _maskedContact = method == 'email'
+          ? _getMaskedEmail(_userEmail)
+          : _getMaskedPhone(_userPhone);
+    });
+
+    _sendVerificationCode();
   }
 
   @override
@@ -91,110 +263,251 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
             const SizedBox(height: 30),
 
-            const Text(
-              'Please enter the 6-digit code we just sent to your phone number',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 15,
-                fontWeight: FontWeight.normal,
+            if (_userEmail.isNotEmpty &&
+                _userPhone.isNotEmpty &&
+                _selectedMethod == null) ...[
+              const Text(
+                'Please choose how you want to receive your verifiaction code: ',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-            OtpTextField(
-              numberOfFields: 6,
-              borderColor: Colors.black,
-              cursorColor: Colors.black,
-              showFieldAsBox: true,
-              fieldHeight: 65,
-              fillColor: Colors.white,
-              filled: false,
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(5),
-                right: Radius.circular(5),
-              ),
-              onCodeChanged: (value) {
-                // handle code change
-              },
-              onSubmit: (String verificationCode) {
-                setState(() {
-                  otpCode = verificationCode;
-                });
-              },
-            ),
-
-            const SizedBox(height: 30),
-
-            //Verify Button
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _verifyCode,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2F5899),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.horizontal(
-                      left: Radius.circular(10),
-                      right: Radius.circular(10),
+              //Email Option
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.email, color: Color(0xFF2F5899)),
+                  title: Text(
+                    'Send via Email',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
-                ),
-                child: const Text(
-                  'Verify',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  subtitle: Text(
+                    _getMaskedEmail(_userEmail),
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.green[600],
+                    ),
                   ),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 15),
+                  onTap: () => _selectMethod('email'),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 30),
-
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'Didn\'t recieve the code?',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 15,
-                    fontWeight: FontWeight.normal,
+              //Phone Option
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Icon(Icons.phone, color: Color(0xFF2F5899)),
+                  title: Text(
+                    'Send via SMS',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
+                  subtitle: Text(
+                    _getMaskedPhone(_userPhone),
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 15),
+                  onTap: () => _selectMethod('phone'),
                 ),
-                const SizedBox(height: 5),
-                _canResend
-                    ? GestureDetector(
-                        onTap: () {
-                          _resendCode();
-                        },
-                        child: const Text(
-                          'Resend',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 15,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.red,
+              ),
+
+              const SizedBox(height: 30),
+            ],
+
+            if (_selectedMethod != null) ...[
+              const SizedBox(height: 10),
+
+              Text(
+                'Please enter the 6-digit code we just sent to your $_selectedMethod',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                _maskedContact,
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal,
+                  color: Color(0xFF2F5899),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 30),
+
+              OtpTextField(
+                numberOfFields: 6,
+                borderColor: Colors.black,
+                cursorColor: Colors.black,
+                showFieldAsBox: true,
+                fieldHeight: 65,
+                fillColor: Colors.white,
+                filled: false,
+                borderRadius: BorderRadius.horizontal(
+                  left: Radius.circular(5),
+                  right: Radius.circular(5),
+                ),
+                onCodeChanged: (value) {
+                  // handle code change
+                },
+                onSubmit: (String verificationCode) {
+                  setState(() {
+                    otpCode = verificationCode;
+                  });
+                  _verifyCode();
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              //Verify Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: _isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF2F5899),
                           ),
                         ),
                       )
-                    : Text(
-                        'Resend available in 00:${_remainingTime.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.grey,
+                    : ElevatedButton(
+                        onPressed: _verifyCode,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2F5899),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadiusGeometry.horizontal(
+                              left: Radius.circular(10),
+                              right: Radius.circular(10),
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Verify',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 30),
+
+              //Resend Code Section
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Didn\'t recieve the code?',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  _canResend
+                      ? GestureDetector(
+                          onTap: () {
+                            _resendCode();
+                          },
+                          child: const Text(
+                            'Resend Code',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'Resend available in 00:${_remainingTime.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.grey,
+                          ),
+                        ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              //Change Method Section
+              if (_userEmail.isNotEmpty && _userPhone.isNotEmpty)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedMethod = null;
+                      otpCode = '';
+                      _timer?.cancel();
+                      _canResend = false;
+                      _remainingTime = 30;
+                    });
+                  },
+                  child: Text(
+                    'Change Verification Method',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xFF2F5899),
+                    ),
+                  ),
+                ),
+            ],
+
+            //Loading state when auto-sending
+            if (_isLoading && _selectedMethod != null) ...[
+              const SizedBox(height: 20),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 10),
+              const Text(
+                'Sending Verification code...',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 15,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ],
         ),
       ),

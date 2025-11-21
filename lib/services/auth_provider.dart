@@ -109,6 +109,64 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<dynamic> sendVerificationCode({
+    required String method,
+    required String email,
+    required String phone,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _apiService.apiCall(
+        endPoint: 'verify-code',
+        method: 'POST',
+        data: {'method': method, 'email': email, 'phone': phone},
+      );
+
+      return result;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<dynamic> verifyCode({
+    required String code,
+    required String method,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _apiService.apiCall(
+        method: 'POST',
+        endPoint: 'verify_code',
+        data: {'code': code, 'method': method},
+      );
+
+      if (result['success'] == true) {
+        if (_user != null) {
+          _user!['email_verified_at'] = DateTime.now().toString();
+          await _storage.write(key: 'user_data', value: json.encode(_user));
+        }
+      }
+
+      return result;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

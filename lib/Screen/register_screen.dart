@@ -64,10 +64,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       await authProvider.register(userData);
 
-      if (authProvider.isAuthenticated) {
-        //Success - Navigate to Home Screen
+      if (authProvider.user != null) {
+        //Success - Navigate to Account Creation
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/account_creation');
+          Navigator.pushReplacementNamed(
+            context,
+            '/account_creation',
+
+            arguments: {
+              'email': _emailController.text.trim(),
+              'phone': _phoneContrroller.text.trim(),
+              'userId': authProvider.user?['id'], //Pass user ID verification
+            },
+          );
         }
       } else {
         print('Registration failed: ${authProvider.error}');
