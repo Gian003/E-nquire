@@ -28,6 +28,16 @@ class _VerifyScreenState extends State<VerifyScreen> {
     _startCountdown();
   }
 
+  /// Get user contact info (email or phone) from ModalRoute arguments
+  /// and auto-select the method to send verification code
+  ///
+  /// If email is not empty, it will be selected as the method
+  /// and the masked email will be displayed
+  /// If phone is not empty, it will be selected as the method
+  /// and the masked phone will be displayed
+  ///
+  /// If a method is selected, it will call [_sendVerificationCode] to
+  /// send a verification code to the selected contact info
   void _getUserContactInfo() {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
@@ -97,6 +107,18 @@ class _VerifyScreenState extends State<VerifyScreen> {
     return '$stars$lastFour';
   }
 
+  /// Sends a verification code to the user's selected contact method (email or phone).
+  ///
+  /// If the user has selected an email, the verification code will be sent to the user's email address.
+  /// If the user has selected a phone number, the verification code will be sent to the user's phone number.
+  ///
+  /// This function sets the [_isLoading] state to true, and then sets it back to false once the verification code has been sent or an error has occurred.
+  ///
+  /// If the verification code is sent successfully, a snackbar is shown to the user with a message indicating that the verification code has been sent to their selected contact method.
+  ///
+  /// If an error occurs while sending the verification code, a snackbar is shown to the user with a message indicating that the verification code could not be sent.
+  ///
+  /// This function also starts a countdown from 30 seconds, and sets the [_canResend] state to false during the countdown period.
   Future<void> _sendVerificationCode() async {
     if (_selectedMethod == null) {
       return;

@@ -69,117 +69,119 @@ class ApiService {
     }
   }
 
-  Future<http.Response> _handleRequest(
-    String method,
-    String endPoint, {
-    dynamic data,
-    bool hasFiles = false,
-  }) async {
-    try {
-      final headers = await _getHeaders(hasFiles: hasFiles);
-      final url = Uri.parse('$baseUrl/$endPoint');
+  dynamic _handleResponse(http.Response response) {
+    final String resonseBody = response.body;
 
-      http.Response response;
-
-      switch (method) {
-        case 'GET':
-          response = await http.get(url, headers: headers);
-        case 'POST':
-          if (hasFiles && data is http.MultipartRequest) {
-            response = await http.Response.fromStream(await data.send());
-          } else {
-            response = await http.post(
-              url,
-              headers: headers,
-              body: hasFiles ? data : json.encode(data),
-            );
-          }
-        case 'PUT':
-          response = await http.put(
-            url,
-            headers: headers,
-            body: hasFiles ? data : json.encode(data),
-          );
-        case 'DELETE':
-          response = await http.delete(url, headers: headers);
-        default:
-          throw Exception('Unsupported HTTP method');
-      }
-
-      return _handleResponse(response);
-    } catch (e) {
-      throw Exception('Network error: $e');
+    if (resonseBody.isEmpty) {
+      return {
+        'success': response.statusCode >= 200 && response.statusCode < 300,
+        'status_code': response.statusCode,
+      };
     }
-  }
+    try {
+      final dynamic responseData = json.decode(resonseBody);
 
-  http.Response _handleResponse(http.Response response) {
-    switch (response.statusCode) {
-      case 200:
-      case 201:
-        return response;
-      case 400:
-        throw Exception('Bad request');
-      case 401:
-        throw Exception('Unauthorized - Please login again');
-      case 403:
-        throw Exception('Forbidden - Access denied');
-      case 404:
-        throw Exception('Resource not found');
-      case 422:
-        throw Exception('Validation failed: ${response.body}');
-      case 500:
-        throw Exception('Server error - Please try again later');
-      default:
-        throw Exception('Request failed with status: ${response.statusCode}');
+      switch (response.statusCode) {
+        case 200: //Ok
+
+        case 201: // Created
+          return responseData;
+
+        case 400: //Bad Request
+          throw ApiException(
+            message: responseData['message'] ?? 'Bad request',
+            errors: responseData['errors'],
+            statusCode: 400,
+          );
+
+        case 401: //Unauthorized
+          throw ApiException(
+            message: responseData['Please login again'],
+            statusCode: 401,
+          );
+
+        case 403: //Forbidden
+          throw ApiException(
+            message: responseData['Access denied'],
+            statusCode: 403,
+          );
+
+        case 404: //Not Found
+          throw ApiException(message: 'Resource not ofund', statusCode: 404);
+
+        case 422: //Validation Error
+          throw ApiException(
+            message: responseData['meesage'] ?? 'Validation error',
+            errors: responseData['errors'],
+            statusCode: 422,
+          );
+
+        case 500: //Server Errod
+          throw ApiException(
+            message: 'Server error - Please try again later',
+            statusCode: 500,
+          );
+
+        default:
+          throw ApiException(
+            message: 'Request failed with status: ${response.statusCode}',
+            statusCode: response.statusCode,
+          );
+      }
+    } catch (e) {
+      //Handle JSON parsing errors
+      throw Exception('Failed to parse server response');
     }
   }
 
   //Auth Methods
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await _handleRequest(
-      'POST',
-      'login',
+    final result = await apiCall(
+      method: 'POST',
+      endPoint: 'login',
       data: {'email': email, 'password': password},
+      requiresAuth: false,
     );
 
-    final data = json.decode(response.body);
-
-    if (data['success'] == true) {
+    if (result['success'] == true) {
       await _storage.write(
         key: 'auth_token',
-        value: data['data']['access_token'],
+        value: result['data']['access_token'],
       );
       await _storage.write(
         key: 'user_data',
-        value: json.encode(data['data']['user']),
+        value: json.decode(result['data']['user']),
       );
     }
 
-    return data;
+    return result;
   }
 
   Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
-    final response = await _handleRequest('POST', 'register', data: userData);
+    final result = await apiCall(
+      method: 'POST',
+      endPoint: 'register',
+      data: userData,
+      requiresAuth: false,
+    );
 
-    final data = json.decode(response.body);
-
-    if (data['success'] == true) {
+    if (result['success'] == true) {
       await _storage.write(
         key: 'auth_token',
-        value: data['data']['access_token'],
+        value: result['data']['access_token'],
       );
       await _storage.write(
-        key: 'user_data',
-        value: json.encode(data['data']['user']),
+        key: 'data',
+        value: json.encode(result['data']['user']),
       );
     }
 
-    return data;
+    return result;
   }
 
   Future<void> logout() async {
     try {
-      await _handleRequest('POST', 'logout');
+      await apiCall(method: 'POST', endPoint: 'logout');
     } catch (e) {
       print('Logout error: $e');
     } finally {
@@ -189,47 +191,90 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await _handleRequest('GET', 'user');
+    final response = await apiCall(method: 'POST', endPoint: 'user');
     return json.decode(response.body);
   }
 
-  //Certificate Request Methods
-  Future<Map<String, dynamic>> submitCertificateRequest({
-    required Map<String, dynamic> requestData,
-    required File idProof,
+  Future<dynamic> sendVerificationCode({
+    required String method,
+    required String email,
+    required String phone,
   }) async {
-    var request = http.MultipartRequest(
+    return await apiCall(
+      method: 'POST',
+      endPoint: 'send-verification',
+      data: {'method': method, 'email': email, 'phone': phone},
+    );
+  }
+
+  Future<dynamic> verifyCode({
+    required String code,
+    required String method,
+  }) async {
+    return await apiCall(
+      method: 'POST',
+      endPoint: 'verify-code',
+      data: {'code': code, 'method': method},
+    );
+  }
+
+  //Certificate Request Methods
+  Future<dynamic> submitCertificateRequest(
+    Map<String, dynamic> requestData,
+  ) async {
+    return await apiCall(
+      method: 'POST',
+      endPoint: 'certificate-requests',
+      data: requestData,
+    );
+  }
+
+  Future<dynamic> getCertificateRequests({int page = 1}) async {
+    return await apiCall(
+      method: 'GET',
+      endPoint: 'certificate-requests?page=$page',
+    );
+  }
+
+  Future<dynamic> getCertificateRequest(int id) async {
+    return await apiCall(method: 'GET', endPoint: 'certificate-requests/$id');
+  }
+
+  //File Upload Helper
+  Future<http.MultipartRequest> prepareMultipartRequest({
+    required String endPoint,
+    required Map<String, dynamic> fields,
+    required Map<String, File> files,
+  }) async {
+    final request = http.AbortableMultipartRequest(
       'POST',
-      Uri.parse('$baseUrl/certificate-requests'),
+      Uri.parse('$baseUrl/$endPoint'),
     );
 
-    //Add headers
+    //Add fields
     final token = await _storage.read(key: 'auth_token');
     request.headers['Authorization'] = 'Bearer $token';
     request.headers['Accept'] = 'application/json';
 
-    //Add files
-    request.files.add(
-      await http.MultipartFile.fromPath('id_proof', idProof.path),
-    );
+    //Add Files
+    for (final entry in files.entries) {
+      request.files.add(
+        await http.MultipartFile.fromPath(entry.key, entry.value.path),
+      );
+    }
 
-    requestData.forEach((key, value) {
+    //Add fields
+    fields.forEach((key, value) {
       request.fields[key] = value.toString();
     });
 
-    final response = await _handleRequest(
-      'POST',
-      'certificate-requests',
-      data: request,
-      hasFiles: true,
-    );
-
-    return json.decode(response.body);
+    return request;
   }
 
-  Future<Map<String, dynamic>> getCertificateRequest(int id) async {
-    final response = await _handleRequest('GET', 'certificate-requests/$id');
-    return json.decode(response.body);
+  //Utility Methods
+  Future<bool> isLoggedIn() async {
+    final token = await _storage.read(key: 'auth_token');
+    return token != null;
   }
 
   Future<bool> checkAuth() async {
@@ -243,5 +288,25 @@ class ApiService {
       return json.decode(userData);
     }
     return null;
+  }
+
+  Future<String?> getToken() async {
+    return await _storage.read(key: 'auth_token');
+  }
+}
+
+class ApiException implements Exception {
+  final String message;
+  final dynamic errors;
+  final int statusCode;
+
+  ApiException({required this.message, this.errors, required this.statusCode});
+
+  @override
+  String toString() {
+    if (errors != null) {
+      return 'ApiException: $message (Status: $statusCode) \nErrors: $errors';
+    }
+    return 'ApiException: $message (Status: $statusCode)';
   }
 }
